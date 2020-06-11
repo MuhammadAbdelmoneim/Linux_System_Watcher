@@ -15,10 +15,10 @@ using std::string;
 using std::vector;
 using std::sort;
 
-// Done: Return the system's CPU
+// Return the system's CPU
 Processor& System::Cpu() { return cpu_; }
 
-// Done: Return a container composed of the system's processes
+// Return a container composed of the system's processes
 vector<Process>& System::Processes() { 
 	vector<int> pids = LinuxParser::Pids();
 	processes_ = {};

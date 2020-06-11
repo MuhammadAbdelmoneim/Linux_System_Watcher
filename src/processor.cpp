@@ -1,7 +1,7 @@
 #include "processor.h"
 #include "linux_parser.h"
 #include <unistd.h>
-// TODO: Return the aggregate CPU utilization
+
 float Processor::Utilization() { 
 	long delta_active, delta_total;
 
@@ -16,5 +16,6 @@ float Processor::Utilization() {
 	delta_total = total_jiffies_end - total_jiffies_start;
 	delta_active = active_jiffies_end - active_jiffies_start;
 
-	return ((float)delta_active / (float)delta_total);
+	return ((float)delta_active / (float)delta_total); 
+ 
  }

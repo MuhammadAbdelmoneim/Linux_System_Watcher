@@ -124,19 +124,6 @@ long LinuxParser::UpTime() {
   return stol(value); 
 }
 
-// // TODO: Read and return the system uptime
-// long LinuxParser::UpTime() {
-//   std::ifstream stream(kProcDirectory + kUptimeFilename);
-//   if (!stream) {
-//     throw std::runtime_error("Non - existing file");
-//   }
-//   string line;
-//   std::getline(stream, line);
-//   std::istringstream buf(line);
-//   std::istream_iterator<string> begin(buf), end;
-//   vector<string> words(begin, end);
-//   return std::stoi(words[0]);
-// }
 
 // Jiffies is the number of ticks occurred since system start-up
 // jiffies / HZ = seconds
@@ -198,7 +185,7 @@ vector<string> LinuxParser::CpuUtilization() {
   return words;
 }
 
-// TODO: Read and return the total number of processes
+// Read and return the total number of processes
 int LinuxParser::TotalProcesses() {
   string line;
   std::ifstream stream(kProcDirectory + kStatFilename);
@@ -219,27 +206,8 @@ int LinuxParser::TotalProcesses() {
 
   return 0;
 }
-// int LinuxParser::TotalProcesses() { 
-//   string line, key, value;
-//   std::ifstream filestream(kProcDirectory + kStatFilename);
-//   if (filestream.is_open()) {
-//     while (std::getline(filestream, line)) {
-//       std::istringstream linestream(line);
-//       while (linestream >> key >> value) {
-//         if (key == "processes") {
-//           return stoi(value);
-//         }
-//       }
-//       /*if (line.find("processes") != string::npos){
-//         return stoi(line.substr(line.find(" ") + 1));
-//       }*/
-//     }
-//   }
 
-//   return 0;
-// }
-
-// TODO: Read and return the number of running processes
+// Read and return the number of running processes
 int LinuxParser::RunningProcesses() {
   string line;
   std::ifstream stream(kProcDirectory + kStatFilename);
@@ -387,7 +355,7 @@ long LinuxParser::UpTime(int pid) {
       i = 0;
       while (std::getline(linestream, info, ' ')) {
         if (i == 21) {
-          return (stol(info) / sysconf(_SC_CLK_TCK)) ;
+          return (stol(info) / (float)sysconf(_SC_CLK_TCK)) ;
         }
         i++;
       }

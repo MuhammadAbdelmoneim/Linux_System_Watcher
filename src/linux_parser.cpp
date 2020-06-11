@@ -112,20 +112,31 @@ float LinuxParser::MemoryUtilization() {
   }
   return float((1 - (freeMem / (totalMem - buffers))));
 }
-
-// TODO: Read and return the system uptime
-long LinuxParser::UpTime() {
-  std::ifstream stream(kProcDirectory + kUptimeFilename);
-  if (!stream) {
-    throw std::runtime_error("Non - existing file");
-  }
+long LinuxParser::UpTime() { 
+  string value;
   string line;
-  std::getline(stream, line);
-  std::istringstream buf(line);
-  std::istream_iterator<string> begin(buf), end;
-  vector<string> words(begin, end);
-  return std::stoi(words[0]);
+  std::ifstream stream(kProcDirectory + kUptimeFilename);
+  if (stream.is_open()) {
+    std::getline(stream, line);
+    std::istringstream linestream(line);
+    linestream >> value;
+  }
+  return stol(value); 
 }
+
+// // TODO: Read and return the system uptime
+// long LinuxParser::UpTime() {
+//   std::ifstream stream(kProcDirectory + kUptimeFilename);
+//   if (!stream) {
+//     throw std::runtime_error("Non - existing file");
+//   }
+//   string line;
+//   std::getline(stream, line);
+//   std::istringstream buf(line);
+//   std::istream_iterator<string> begin(buf), end;
+//   vector<string> words(begin, end);
+//   return std::stoi(words[0]);
+// }
 
 // Jiffies is the number of ticks occurred since system start-up
 // jiffies / HZ = seconds
@@ -208,6 +219,25 @@ int LinuxParser::TotalProcesses() {
 
   return 0;
 }
+// int LinuxParser::TotalProcesses() { 
+//   string line, key, value;
+//   std::ifstream filestream(kProcDirectory + kStatFilename);
+//   if (filestream.is_open()) {
+//     while (std::getline(filestream, line)) {
+//       std::istringstream linestream(line);
+//       while (linestream >> key >> value) {
+//         if (key == "processes") {
+//           return stoi(value);
+//         }
+//       }
+//       /*if (line.find("processes") != string::npos){
+//         return stoi(line.substr(line.find(" ") + 1));
+//       }*/
+//     }
+//   }
+
+//   return 0;
+// }
 
 // TODO: Read and return the number of running processes
 int LinuxParser::RunningProcesses() {
@@ -301,32 +331,67 @@ string LinuxParser::Uid(int pid) {
 }
 
 // Read and return the user associated with a process
-string LinuxParser::User(int pid) {
-  string line;
-  string username;
-  std::fstream stream(kPasswordPath);
-  while (std::getline(stream, line)) {
-    if (line.find("x:" + LinuxParser::Uid(pid)) != std::string::npos) {
-      username = line.substr(0, line.find(":"));
-      break;
+// string LinuxParser::User(int pid) {
+//   string line;
+//   string username;
+//   std::fstream stream(kPasswordPath);
+//   while (std::getline(stream, line)) {
+//     if (line.find("x:" + LinuxParser::Uid(pid)) != std::string::npos) {
+//       username = line.substr(0, line.find(":"));
+//       break;
+//     }
+//   }
+//   return username;
+// }
+string LinuxParser::User(int pid) { 
+  string line, info, user;
+  string uid = LinuxParser::Uid(pid);
+  int i;
+
+  if (uid == ""){
+    return "None";
+  }
+
+  std::ifstream filestream(kPasswordPath);
+  if (filestream.is_open()){
+    while (std::getline(filestream, line)) {
+      std::istringstream linestream(line);
+      i = 0;
+      while (std::getline(linestream, info, ':')) {
+        if (i == 0){
+          user = info;
+          i++;
+          continue;
+        }
+        if (info == uid) {
+          return user;
+        }
+        else if (i == 2) {
+          break;
+        }
+        i++;
+      }
     }
   }
-  return username;
+  return "None";
 }
 
-//Read and return the uptime of a process
-long LinuxParser::UpTime(int pid) {
-  string line;
-  std::ifstream stream(kProcDirectory + kSlash + std::to_string(pid) +
-                       kStatFilename);
-  if (stream) {
-    std::getline(stream, line);
-    std::istringstream buf(line);
-    std::istream_iterator<string> begin(buf), end;
-    vector<string> words(begin, end);
-    return std::stoi(words[21]) / sysconf(_SC_CLK_TCK);
-  } else {
-    throw std::runtime_error("no such file");
+long LinuxParser::UpTime(int pid) { 
+  string line, info;
+  int i;
+
+  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatFilename);
+  if (filestream.is_open()){
+    while (std::getline(filestream, line)) {
+      std::istringstream linestream(line);
+      i = 0;
+      while (std::getline(linestream, info, ' ')) {
+        if (i == 21) {
+          return (stol(info) / sysconf(_SC_CLK_TCK)) ;
+        }
+        i++;
+      }
+    }
   }
-  return 0;
+return 0;
 }

@@ -47,8 +47,8 @@ test::~test()
 }
 
 int main() {
-  // System system;
-  // NCursesDisplay::Display(system);
-  std::cout << LinuxParser::MemoryUtilization()<< std::endl;
+  System system;
+  NCursesDisplay::Display(system);
+  
  
 }
